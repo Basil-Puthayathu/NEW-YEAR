@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+            // REPLACE WITH YOUR PUBLIC KEY FROM EMAILJS
+            emailjs.init("YOUR_PUBLIC_KEY"); 
+       })();
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333;
+            --glossy-red-1: #b3001b;
+            --glossy-red-2: #ff2a4d;
+            --gold: #FFD700;
+            --slide1-bg: #ffffff;
+            --slide1-text: #333;
+        }
+
+        /* --- Global Reset and Body --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* --- Red Theme Glossy Styles --- */
+        .red-theme {
+            /* Set the specific hex color as fallback background */
+            background-color: #b3001b !important; 
+            /* Use a gradient focused on #b3001b (the deeper red) for a glossy effect */
+            background: radial-gradient(circle at 50% 10%, #ff2a4d 0%, #b3001b 40%, #8c0011 100%);
+            color: white !important;
+        }
+        
+        /* Ensure h1 and p also invert color when this class is active */
+        .red-theme h1, 
+        .red-theme p,
+        .red-theme .year-wrapper {
+             color: white !important;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--slide1-bg);
+            color: var(--slide1-text);
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            transition: background-color 1s ease, color 1s ease;
+        }
+
+        /* --- Falling Stars Canvas --- */
+        #star-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- Slide Container & Transition --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            color:#c2c2c2;;
+        }
+
+        /* --- Typography --- */
+        h1 {
+            color: var(--glossy-red-1);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 20px; 
+            transition: color 1s ease;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            transition: color 1s ease;
+        }
+
+        /* --- Glossy Button (Default) --- */
+        .btn {
+            background: linear-gradient(145deg, var(--glossy-red-2), var(--glossy-red-1));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(179, 0, 27, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+            text-decoration: none;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 0, 27, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Button Inverted for Slide 1 & 2 --- */
+        .btn.inverted {
+            background: var(--glossy-red-1);;
+            color: var(--bg-color);
+            border: 2px solid var(--glossy-red-1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn.inverted:hover {
+            background: var(--slide1-bg);
+            color: rgba(179, 0, 27, 0.76);
+            box-shadow: 0 6px 20px rgba(179, 0, 27, 0.6);
+        }
+
+        /* --- Year Transition Animation (Slide 1) --- */
+        .year-wrapper {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            height: 85px;
+            overflow: hidden;
+            position: relative;
+            color: var(--glossy-red-1);
+            display: flex;
+            justify-content: center;
+        }
+        
+        .changing-digit {
+            display: flex;
+            flex-direction: column;
+            transition: transform 3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform: translateY(0%); 
+        }
+        
+        .changing-digit.animate-up {
+            transform: translateY(-90%);
+        }
+
+        /* --- HNY Pulsing Animation (Slide 2) --- */
+        #slide2 h1 {
+            animation: hny-pulse 2s infinite alternate;
+            text-shadow: 0 0 10px rgba(255, 42, 77, 0.5);
+        }
+
+        @keyframes hny-pulse {
+            0% { transform: scale(1); text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            100% { transform: scale(1.03); text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
+        }
+
+        /* --- Puzzle Game Styles (Slide 3) --- */
+        #puzzle-container {
+            width: 300px;
+            height: 300px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            border: 3px solid var(--glossy-red-1);
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            background: #ccc; /* Background for visibility */
+        }
+
+        .puzzle-tile {
+            width: 100%;
+            height: 100%;
+            background-image: url('image/her.jpg'); /* Set image once here */
+            background-size: 300% 300%; /* Important for 3x3 slicing */
+            cursor: pointer;
+            /* Use red/white border for selection highlight */
+            border: 1px solid var(--bg-color); 
+            transition: all 0.3s ease-in-out; 
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+            user-select: none;
+            box-sizing: border-box;
+        }
+        
+        .puzzle-tile.selected {
+            border: 3px solid var(--glossy-red-1); /* Selection Highlight */
+            box-shadow: 0 0 15px rgba(255, 42, 77, 0.7);
+        }
+
+        .puzzle-tile:hover {
+            transform: scale(1.05);
+            z-index: 20;
+        }
+        
+        /* --- Gift Boxes Styles (Slide 4) --- */
+        #gift-area {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 30px;
+            height: 150px;
+        }
+
+        .gift-box {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #d4001a, #8c0011);
+            border: 3px solid var(--gold);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.42, 0, 0.58, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .gift-box:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .gift-box::before { /* The Ribbon */
+            content: ' ';
+            position: absolute;
+            top: 0; bottom: 0; left: 45%;
+            width: 10%;
+            background-color: var(--gold);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+        }
+
+        .gift-box::after { /* The Bow */
+            content: '🎁';
+            font-size: 2rem;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: opacity 0.5s ease;
+        }
+
+        /* Animation for Box Opening */
+        .gift-box.open {
+            background: #fff;
+            transform: rotateY(180deg);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .gift-box.open::after {
+            opacity: 0;
+        }
+        
+        .shuffling {
+            animation: shuffle 1s ease-in-out;
+        }
+
+        @keyframes shuffle {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(30px) rotate(5deg); }
+            50% { transform: translateX(-30px) rotate(-5deg); }
+            75% { transform: translateX(20px) rotate(3deg); }
+            100% { transform: translateX(0); }
+        }
+
+        /* --- Confetti & Popup Overlays (Same as previous) --- */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--glossy-red-1);
+            animation: fall linear forwards;
+            z-index: 5;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+        
+        /* Popup Styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 80%;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-content h2 {
+            color: var(--glossy-red-1);
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <canvas id="star-canvas"></canvas>
+
+    <div class="popup-overlay" id="custom-popup">
+        <div class="popup-content">
+            <h2 id="popup-header"></h2>
+            <p id="popup-message"></p>
+            <button class="btn" id="modal-continue-button" onclick="closePopupAndContinue()">Close</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="slide active" id="slide1">
+            <div class="year-wrapper">
+                <span>202</span>
+                <div class="changing-digit" id="year-animator">
+                    <span>5</span>
+                    <span>6</span>
+                </div>
+            </div>
+            <p style="margin-top: 20px;">Ready for the next chapter?</p>
+            <button class="btn inverted" id="open-btn" onclick="startIntroAnimation()">Open</button>
+        </div>
+
+        <div class="slide" id="slide2">
+            <h1 style="color:#c2c2c2;">Happy New Year</h1>
+            <p style="color:#c2c2c2;">
+                As the calendar turns, I just wanted to pause and say thank you. 
+                Thank you for being part of my journey this past year.
+            </p>
+            <p style="color: #c2c2c2;">
+                I value the time we spend together, the laughter, and the quiet moments. 
+                Here is to creating more beautiful memories in 2026.
+            </p>
+            <button class="btn inverted" id="play-btn" onclick="startPlayTransition()">Let's Have Some Fun</button>
+        </div>
+
+        <div class="slide" id="slide3">
+            <h1>Solve the Puzzle</h1>
+            <p>Click two tiles to swap them. Put the pieces in the right order (1 to 9) to unlock your gift!</p>
+            <p>Attempts: <span id="puzzle-attempts">0</span></p>
+            <div id="puzzle-container">
+                </div>
+            <button class="btn hidden" id="gift-button" onclick="nextSlide(4)">Your New Year Gift</button>
+        </div>
+        
+        <div class="slide" id="slide4">
+            <h1>Pick Your Gift</h1>
+            <p>The gifts have shuffled! Choose **one** box to open your wish.</p>
+            <div id="gift-area">
+                <div class="gift-box" id="box1" data-box-id="1" onclick="openGiftBox(1)"></div>
+                <div class="gift-box" id="box2" data-box-id="2" onclick="openGiftBox(2)"></div>
+                <div class="gift-box" id="box3" data-box-id="3" onclick="openGiftBox(3)"></div>
+            </div>
+            <p id="gift-status">You have 3 choices left.</p>
+            <button class="btn hidden" id="next-page-btn" onclick="nextSlide(5)">Continue</button>
+        </div>
+
+        <div class="slide" id="slide5">
+            <h1>One Last Question</h1>
+            <p>Did you like this New Year wish?</p>
+            <div>
+                <button class="btn" onclick="handleResponse('yes')">Yes</button>
+                <button class="btn" style="background: #999;" onclick="handleResponse('no')">No</button>
+            </div>
+        </div>
+
+        <div class="slide" id="slide6">
+            <h1 id="final-header"></h1>
+            <p id="final-message"></p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const PUZZLE_SIZE = 3; 
+        const TILE_COUNT = 9;
+        const PUZZLE_IMAGE_URL = 'image/her.jpg';
+        const SERVICE_ID = 'YOUR_SERVICE_ID'; // Replace
+        const TEMPLATE_ID = 'YOUR_TEMPLATE_ID'; // Replace
+
+        // --- 1. Star Animation Logic ---
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let stars = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Star {
+            constructor() {
+                this.reset(true);
+            }
+            reset(initial = false) {
+                this.x = Math.random() * width;
+                this.y = initial ? Math.random() * height : -10;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 0.5 + 0.2;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.twinkleSpeed = Math.random() * 0.02;
+            }
+            update() {
+                this.y += this.speed;
+                this.opacity += Math.sin(Date.now() * this.twinkleSpeed) * 0.01;
+                if (this.y > height) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 215, 0, ${this.opacity})`; 
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<60; i++) stars.push(new Star());
+
+        function animateStars() {
+            ctx.clearRect(0, 0, width, height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
+
+        // --- 2. Page Navigation & Transitions ---
+
+const body = document.body;
+const yearAnimator = document.getElementById('year-animator');
+const openBtn = document.getElementById('open-btn');
+const playBtn = document.getElementById('play-btn');
+
+// Function to set the theme based on the target color (Red or White)
+function setTheme(isRedTheme) {
+    let nextBg, nextText, nextAccentColor;
+    
+    if (isRedTheme) {
+        // Red Theme (Red background, White text)
+        nextBg = '#b3001b'; 
+        nextText = '#ffffff'; 
+        nextAccentColor = '#ffffff'; 
+    } else {
+        // White Theme (White background, Dark text)
+        nextBg = '#ffffff'; 
+        nextText = '#333333'; 
+        nextAccentColor = '#b3001b'; // Red
+    }
+    
+    // Apply changes globally and to custom CSS variables
+    body.style.backgroundColor = nextBg;
+    body.style.color = nextText;
+    document.documentElement.style.setProperty('--slide1-bg', nextBg);
+    document.documentElement.style.setProperty('--slide1-text', nextText);
+    
+    // Update the color of elements that use the primary accent color
+    document.querySelectorAll('h1').forEach(h1 => h1.style.color = nextAccentColor);
+    document.querySelectorAll('p').forEach(p => p.style.color = nextText);
+    
+    // Slide 1 year animation text
+    const yearWrapper = document.querySelector('.year-wrapper');
+    if (yearWrapper) {
+        yearWrapper.style.color = nextAccentColor;
+    }
+}
+
+function nextSlide(slideNumber) {
+    
+    let isTargetRed = false; // Assume White theme by default
+    
+    // Determine the required theme based on the desired sequence:
+    // 1 (W), 2 (R), 3 (W), 4 (W), 5 (R), 6 (W)
+    if (slideNumber === 2 || slideNumber === 5) {
+        isTargetRed = true;
+    }
+    
+    // Apply the theme immediately before the slide transition
+    setTheme(isTargetRed); 
+    
+    // Standard slide transition logic
+    document.querySelectorAll('.slide').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    
+    const newSlide = document.getElementById('slide' + slideNumber);
+    newSlide.style.display = 'flex';
+    
+    setTimeout(() => {
+        newSlide.classList.add('active');
+    }, 10);
+
+    if (slideNumber === 3) {
+        initializePuzzle();
+    } else if (slideNumber === 4) {
+        shuffleBoxes();
+    }
+}
+
+function startIntroAnimation() {
+    yearAnimator.classList.add('animate-up');
+    openBtn.disabled = true;
+
+    // Slide 1 is white, so we need to set the Red theme for Slide 2
+    setTheme(true); 
+
+    setTimeout(() => {
+        nextSlide(2);
+        openBtn.disabled = false;
+    }, 3000);
+}
+
+function startPlayTransition() {
+    // nextSlide(3) will check the number and apply the White theme.
+    nextSlide(3); 
+}
+
+// NOTE: You must also ensure the initial theme of the body is set to WHITE
+// before any animations begin, which it is by default in your CSS.
+
+        // --- 3. Puzzle Game Logic (Slide 3) - SWAP PUZZLE IMPLEMENTATION ---
+        let pieces = [];
+        let attempts = 0;
+        let selectedTile = null;
+
+        function getBackgroundPosition(pieceIndex) {
+            const correctPos = parseInt(pieceIndex);
+            const row = Math.floor(correctPos / PUZZLE_SIZE); // Row 0, 1, or 2
+            const col = correctPos % PUZZLE_SIZE; // Col 0, 1, or 2
+            
+            // For 3x3 tiles, the positions are 0%, 50%, and 100%. 
+            // The formula (col * 50)% works for 3x3.
+            return `${col * 50}% ${row * 50}%`;
+        }
+
+        // Initializes the puzzle grid
+        function initializePuzzle() {
+            const container = document.getElementById('puzzle-container');
+            container.innerHTML = '';
+            document.getElementById('puzzle-attempts').innerText = '0';
+            document.getElementById('gift-button').classList.add('hidden');
+            attempts = 0;
+            
+            // Create pieces array: [0, 1, 2, ..., 8]
+            pieces = Array.from({ length: TILE_COUNT }, (_, i) => i);
+            
+            // Randomize the pieces (Fisher-Yates shuffle)
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            }
+
+            for (let i = 0; i < TILE_COUNT; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('puzzle-tile');
+                // Data attributes track the image piece currently in this position
+                tile.dataset.current = pieces[i]; 
+                tile.dataset.correct = i; 
+                
+                // Calculate and apply the correct background slice for this piece number
+                tile.style.backgroundPosition = getBackgroundPosition(pieces[i]);
+                
+                tile.addEventListener('click', handleTileClick);
+                container.appendChild(tile);
+            }
+        }
+
+        // Handles the click/swap logic
+        function handleTileClick(event) {
+            const tile = event.currentTarget;
+
+            if (selectedTile === null) {
+                // Select the first tile
+                selectedTile = tile;
+                tile.classList.add('selected'); // Highlight selected tile
+            } else if (selectedTile === tile) {
+                // Deselect the tile
+                selectedTile.classList.remove('selected');
+                selectedTile = null;
+            } else {
+                // Swap the two selected tiles
+                swapTiles(selectedTile, tile);
+                
+                // Update attempt count
+                attempts++;
+                document.getElementById('puzzle-attempts').innerText = attempts;
+                
+                // Deselect both tiles
+                selectedTile.classList.remove('selected');
+                tile.classList.remove('selected');
+                selectedTile = null;
+                
+                // Check for win immediately after swapping
+                if (checkWin()) {
+                    endGame(true);
+                }
+            }
+        }
+
+        // Performs the visual (background position) and data swap
+        function swapTiles(t1, t2) {
+            const piece1 = t1.dataset.current;
+            const piece2 = t2.dataset.current;
+
+            // Swap piece number data attributes
+            t1.dataset.current = piece2;
+            t2.dataset.current = piece1;
+
+            // Recalculate and apply new background styles (the image slice)
+            t1.style.backgroundPosition = getBackgroundPosition(piece2);
+            t2.style.backgroundPosition = getBackgroundPosition(piece1);
+        }
+
+        // Checks if the puzzle is solved
+        function checkWin() {
+            const tiles = document.querySelectorAll('#puzzle-container .puzzle-tile');
+            
+            let isWin = true;
+            tiles.forEach(tile => {
+                // Check if the current piece number matches the tile's correct position index
+                if (tile.dataset.current !== tile.dataset.correct) {
+                    isWin = false;
+                }
+            });
+            return isWin;
+        }
+
+        function endGame(isSolved) {
+            const tiles = document.querySelectorAll('#puzzle-container .puzzle-tile');
+            
+            if (isSolved) {
+                const header = "You're a Genius! 🤯";
+                const message = "You are a genius, as beautiful as you are clever! You solved the puzzle in " + attempts + " attempts.";
+                
+                // Final state: remove borders
+                tiles.forEach(tile => {
+                    tile.onclick = null;
+                    tile.classList.remove('selected');
+                    tile.style.border = '1px solid transparent'; 
+                });
+                
+                document.getElementById('gift-button').classList.remove('hidden');
+                openPopup(header, message, true); // True to indicate win/success
+            } else {
+                 const header = "Not Quite! 😉";
+                 const message = "Keep swapping! The image isn't quite right yet. Press Close to continue.";
+                 openPopup(header, message, false); // False to indicate continuing
+            }
+        }
+        
+        // --- 4. Gift Box Game Logic (Slide 4) ---
+        let boxesClicked = 0;
+        let giftAttempts = 3;
+
+        function shuffleBoxes() {
+            const boxes = document.querySelectorAll('.gift-box');
+            boxes.forEach(box => {
+                box.classList.add('shuffling');
+                box.classList.remove('open');
+                box.onclick = () => openGiftBox(parseInt(box.dataset.boxId));
+                box.style.opacity = 1;
+            });
+            document.getElementById('next-page-btn').classList.add('hidden');
+            boxesClicked = 0;
+            giftAttempts = 3;
+            document.getElementById('gift-status').innerText = `You have ${giftAttempts} choices left.`;
+            
+            setTimeout(() => {
+                boxes.forEach(box => box.classList.remove('shuffling'));
+            }, 1000); 
+        }
+
+        function animateBoxOpen(boxElement) {
+            createConfetti(25, boxElement.offsetLeft + boxElement.offsetWidth/2, boxElement.offsetTop + boxElement.offsetHeight/2);
+            boxElement.classList.add('open');
+            boxElement.onclick = null; // Prevent re-click
+        }
+
+        function openGiftBox(boxId) {
+            if (boxesClicked >= 3) return;
+
+            boxesClicked++;
+            giftAttempts--;
+            const boxElement = document.getElementById(`box${boxId}`);
+            animateBoxOpen(boxElement);
+            
+            let header, message;
+
+            if (boxesClicked === 1) {
+                header = "It's Me! 😉";
+                message = "Did you think I was hiding? No, I'm right here.";
+            } else if (boxesClicked === 2) {
+                header = "Again, It's Me! 😂";
+                message = "I guess I just wanted to say hi twice!";
+            } else if (boxesClicked === 3) {
+                header = "The Greatest Gift! ❤️";
+                message = "You found it! I am one of your greatest gifts, just as you are mine. Happy New Year!";
+                document.getElementById('next-page-btn').classList.remove('hidden');
+            }
+            
+            document.getElementById('gift-status').innerText = `You have ${giftAttempts > 0 ? giftAttempts : 'no'} choices left.`;
+            openPopup(header, message); // Use standard popup for gift game
+        }
+        
+        // --- 5. Popup and Confetti Utilities ---
+        
+        function openPopup(header, message, isWinModal = false) {
+            document.getElementById('popup-header').innerText = header;
+            document.getElementById('popup-message').innerText = message;
+            
+            const btn = document.getElementById('modal-continue-button');
+            btn.innerText = isWinModal ? "Unlock Gift" : "Close";
+            
+            // In the case of a win modal, the button needs to call nextSlide(4)
+            btn.onclick = isWinModal ? () => { closePopup(); nextSlide(4); } : closePopup;
+            
+            document.getElementById('custom-popup').classList.add('show');
+        }
+
+        function closePopup() {
+            document.getElementById('custom-popup').classList.remove('show');
+        }
+        
+        // Function to explicitly close popup, used by non-win modals
+        function closePopupAndContinue() {
+             document.getElementById('custom-popup').classList.remove('show');
+             // If the user closes the puzzle 'Not Quite' message, deselect any tile
+             if(selectedTile) {
+                 selectedTile.classList.remove('selected');
+                 selectedTile = null;
+             }
+        }
+
+        function createConfetti(count = 50, centerX = width / 2, centerY = height / 2) {
+            for(let i=0; i<count; i++) {
+                const conf = document.createElement('div');
+                conf.classList.add('confetti');
+                conf.style.left = (centerX + (Math.random() - 0.5) * 100) + 'px'; 
+                conf.style.top = (centerY + (Math.random() - 0.5) * 100) + 'px'; 
+                conf.style.animationDuration = Math.random() * 3 + 2 + 's';
+                conf.style.backgroundColor = Math.random() > 0.5 ? 'var(--glossy-red-2)' : 'var(--gold)';
+                document.body.appendChild(conf);
+                
+                setTimeout(() => conf.remove(), 5000); 
+            }
+        }
+        
+        // --- 6. Final Response & Email Logic (Slide 5/6) ---
+        
+        function handleResponse(answer) {
+            nextSlide(6);
+            const header = document.getElementById('final-header');
+            const msg = document.getElementById('final-message');
+
+            if (answer === 'yes') {
+                header.innerText = "Thank You Very Much! ❤️";
+                msg.innerText = "I'm so glad you liked it and spent your time on it. Happy New Year!";
+                createConfetti(100);
+                sendEmail("Successful");
+            } else {
+                header.innerText = "I Will Try Next Time! 😔";
+                msg.innerText = "Thank you for spending time on this wish. I only have my time to spend for you, and I will try to do my best next time.";
+                sendEmail("Try Next Time");
+            }
+        }
+
+        function sendEmail(statusMessage) {
+            const templateParams = {
+                to_email: 'basilputhaythuu@gmail.com', 
+                message: statusMessage
+            };
+
+            if (emailjs.send && SERVICE_ID !== 'YOUR_SERVICE_ID' && TEMPLATE_ID !== 'YOUR_TEMPLATE_ID') {
+                emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                    .then(function(response) {
+                       console.log('EMAIL SUCCESS:', response.status, response.text);
+                    }, function(error) {
+                       console.log('EMAIL FAILED:', error);
+                    });
+            } else {
+                console.log('EmailJS not configured. Logged status:', statusMessage);
+            }
+        }
+    </script>
+</body>
+</html>

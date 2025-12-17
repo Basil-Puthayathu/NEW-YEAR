@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-Piece Image Puzzle Game</title>
+    
+    <style>
+        /* --- CSS STYLES FOR THE PUZZLE GAME ONLY --- */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        #game-area {
+            width: 100%;
+            max-width: 300px; /* Standard 3x3 size */
+            height: 300px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px; /* Gap between pieces */
+            background: #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .puzzle-tile {
+            width: 100%;
+            height: 100%;
+            /* 300% covers the 3x3 grid (3 tiles wide x 3 tiles high) */
+            background-size: 300% 300%; 
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease-out;
+            position: relative;
+        }
+
+        .puzzle-tile:hover {
+            transform: scale(1.05);
+            z-index: 20;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+        }
+        
+        /* Button Style for 'Check Puzzle' */
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Modal/Popup Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.5s ease-out;
+            max-width: 80%;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body onload="initPuzzleGame()">
+
+    <h1>9-Piece Image Puzzle</h1>
+    <p>Click two tiles to swap them. Put the image back together!</p>
+    <p>Attempts: <span id="attempts">0</span></p>
+    
+    <div id="game-area">
+        </div>
+    
+    <button class="btn" onclick="checkWin()">Check Puzzle</button>
+    
+
+    <div id="game-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="modal-header"></h2>
+            <p id="modal-text"></p>
+            <button class="btn" id="modal-button"></button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- JAVASCRIPT FOR THE PUZZLE GAME ONLY ---
+
+        // ***************************************************************
+        // *** Your Image Path (Relative to this HTML file) ***
+        const PUZZLE_IMAGE_URL = 'image/her.jpg'; 
+        // ***************************************************************
+        
+        const TILE_COUNT = 9;
+        let pieces = [];
+        let attempts = 0;
+        let selectedTile = null;
+
+        // Initializes the puzzle grid
+        function initPuzzleGame() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = '';
+            // Create pieces array: [0, 1, 2, ..., 8]
+            pieces = Array.from({ length: TILE_COUNT }, (_, i) => i); 
+            
+            // Randomize the pieces (Fisher-Yates shuffle)
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            }
+
+            attempts = 0;
+            document.getElementById('attempts').innerText = attempts;
+
+            for (let i = 0; i < TILE_COUNT; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('puzzle-tile');
+                tile.dataset.current = pieces[i];  // The piece number currently in this position
+                tile.dataset.correct = i;          // The correct position for the final image
+                tile.id = `tile-${i}`;
+                
+                // Calculate and apply the correct background slice for this piece number
+                tile.style.backgroundImage = `url(${PUZZLE_IMAGE_URL})`;
+                tile.style.backgroundPosition = getBackgroundPosition(pieces[i]);
+                
+                tile.addEventListener('click', handleTileClick);
+                gameArea.appendChild(tile);
+            }
+        }
+
+        // Handles the click/swap logic
+        function handleTileClick(event) {
+            const tile = event.currentTarget;
+
+            if (selectedTile === null) {
+                // Select the first tile
+                selectedTile = tile;
+                tile.style.border = '2px solid red'; // Highlight selected tile
+            } else if (selectedTile === tile) {
+                // Deselect the tile
+                selectedTile.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+                selectedTile = null;
+            } else {
+                // Swap the two selected tiles
+                swapTiles(selectedTile, tile);
+                
+                // Deselect both tiles
+                selectedTile.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+                tile.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+                selectedTile = null;
+
+                attempts++;
+                document.getElementById('attempts').innerText = attempts;
+            }
+        }
+
+        // Performs the visual and data swap
+        function swapTiles(t1, t2) {
+            const piece1 = t1.dataset.current;
+            const piece2 = t2.dataset.current;
+
+            // Swap piece number data attributes
+            t1.dataset.current = piece2;
+            t2.dataset.current = piece1;
+
+            // Recalculate and apply new background styles (the image slice)
+            t1.style.backgroundPosition = getBackgroundPosition(piece2);
+            t2.style.backgroundPosition = getBackgroundPosition(piece1);
+        }
+
+        // Calculates the required background-position for a given piece number
+        function getBackgroundPosition(pieceIndex) {
+            const correctPos = parseInt(pieceIndex);
+            const row = Math.floor(correctPos / 3);
+            const col = correctPos % 3;
+            // The position is calculated based on percentages of the tile size
+            return `${col * 50}% ${row * 50}%`;
+        }
+
+        // Checks if the puzzle is solved
+        function checkWin() {
+            const tiles = document.querySelectorAll('.puzzle-tile');
+            let isWin = true;
+            
+            tiles.forEach(tile => {
+                // Check if the current piece number matches the tile's correct position index
+                if (tile.dataset.current !== tile.dataset.correct) {
+                    isWin = false;
+                }
+            });
+
+            if (isWin) {
+                showModal('win');
+            } else {
+                showModal('fail');
+            }
+        }
+        
+        // Displays a win/loss modal
+        function showModal(type) {
+            const modal = document.getElementById('game-modal');
+            const header = document.getElementById('modal-header');
+            const text = document.getElementById('modal-text');
+            const button = document.getElementById('modal-button');
+
+            if (type === 'win') {
+                header.innerText = "Puzzle Solved! 🎉";
+                text.innerText = `Congratulations! You solved the puzzle in ${attempts} attempts.`;
+                button.innerText = "Play Again";
+                button.onclick = () => {
+                    modal.style.display = 'none';
+                    initPuzzleGame(); // Restart the game
+                };
+            } else { // fail
+                header.innerText = "Not Quite! 😉";
+                text.innerText = "Keep swapping! The image isn't quite right yet. Press Try Again to continue.";
+                button.innerText = "Try Again";
+                button.onclick = () => {
+                    modal.style.display = 'none';
+                    // User continues playing on the current board
+                };
+            }
+            modal.style.display = 'flex';
+        }
+
+        // Expose functions globally since they are called from HTML onclick attributes
+        window.checkWin = checkWin;
+        window.initPuzzleGame = initPuzzleGame; 
+    </script>
+</body>
+</html>

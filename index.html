@@ -9,7 +9,7 @@
     <script type="text/javascript">
        (function(){
             // REPLACE WITH YOUR PUBLIC KEY FROM EMAILJS
-            emailjs.init("YOUR_PUBLIC_KEY"); 
+            emailjs.init('Wtr6OvcNiiq9dKOne'); 
        })();
     </script>
 
@@ -55,6 +55,7 @@
             position: relative;
             transition: background-color 1s ease, color 1s ease;
         }
+        
 
         /* --- Falling Stars Canvas --- */
         #star-canvas {
@@ -96,6 +97,17 @@
             opacity: 1;
             color:#c2c2c2;;
         }
+        .wish-item {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease;
+    margin: 5px 0 !important;
+    font-weight: bold;
+}
+.wish-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
         /* --- Typography --- */
         h1 {
@@ -377,7 +389,7 @@
                     <span>6</span>
                 </div>
             </div>
-            <p style="margin-top: 20px;">Ready for the next chapter?</p>
+            <p style="margin-top: 20px;">Are you ready for the next chapter?</p>
             <button class="btn inverted" id="open-btn" onclick="startIntroAnimation()">Open</button>
         </div>
 
@@ -405,13 +417,13 @@
         
         <div class="slide" id="slide4">
             <h1>Pick Your Gift</h1>
-            <p>The gifts have shuffled! Choose **one** box to open your wish.</p>
+            <p>The gifts have shuffled! You can choose **one** box.</p>
             <div id="gift-area">
                 <div class="gift-box" id="box1" data-box-id="1" onclick="openGiftBox(1)"></div>
                 <div class="gift-box" id="box2" data-box-id="2" onclick="openGiftBox(2)"></div>
                 <div class="gift-box" id="box3" data-box-id="3" onclick="openGiftBox(3)"></div>
             </div>
-            <p id="gift-status">You have 3 choices left.</p>
+            <p id="gift-status">You are special so you can have 3.</p>
             <button class="btn hidden" id="next-page-btn" onclick="nextSlide(5)">Continue</button>
         </div>
 
@@ -436,8 +448,8 @@
         const PUZZLE_SIZE = 3; 
         const TILE_COUNT = 9;
         const PUZZLE_IMAGE_URL = 'image/her.jpg';
-        const SERVICE_ID = 'YOUR_SERVICE_ID'; // Replace
-        const TEMPLATE_ID = 'YOUR_TEMPLATE_ID'; // Replace
+        const SERVICE_ID = 'service_7n3ranz'; // Replace
+        const TEMPLATE_ID = 'template_d71f73k'; // Replace
 
         // --- 1. Star Animation Logic ---
         const canvas = document.getElementById('star-canvas');
@@ -696,7 +708,7 @@ function startPlayTransition() {
             
             if (isSolved) {
                 const header = "You're a Genius! 🤯";
-                const message = "You are a genius, as beautiful as you are clever! You solved the puzzle in " + attempts + " attempts.";
+                const message = "You are a awesome, as same as beautiful. You solved the puzzle in " + attempts + " attempts.";
                 
                 // Final state: remove borders
                 tiles.forEach(tile => {
@@ -753,18 +765,18 @@ function startPlayTransition() {
             let header, message;
 
             if (boxesClicked === 1) {
-                header = "It's Me! 😉";
+                header = "Here It's Me! 😉";
                 message = "Did you think I was hiding? No, I'm right here.";
             } else if (boxesClicked === 2) {
-                header = "Again, It's Me! 😂";
+                header = "You dont see  Me! 😂";
                 message = "I guess I just wanted to say hi twice!";
             } else if (boxesClicked === 3) {
                 header = "The Greatest Gift! ❤️";
-                message = "You found it! I am one of your greatest gifts, just as you are mine. Happy New Year!";
+                message = "lol! You found it! I am one of your greatest gifts. Happy New Year!";
                 document.getElementById('next-page-btn').classList.remove('hidden');
             }
             
-            document.getElementById('gift-status').innerText = `You have ${giftAttempts > 0 ? giftAttempts : 'no'} choices left.`;
+            document.getElementById('gift-status').innerText = `You are special so you have ${giftAttempts > 0 ? giftAttempts : 'no'} choices left.`;
             openPopup(header, message); // Use standard popup for gift game
         }
         
@@ -813,40 +825,59 @@ function startPlayTransition() {
         
         // --- 6. Final Response & Email Logic (Slide 5/6) ---
         
-        function handleResponse(answer) {
-            nextSlide(6);
-            const header = document.getElementById('final-header');
-            const msg = document.getElementById('final-message');
+function handleResponse(answer) {
+    nextSlide(6);
+    const header = document.getElementById('final-header');
+    const msg = document.getElementById('final-message');
 
-            if (answer === 'yes') {
-                header.innerText = "Thank You Very Much! ❤️";
-                msg.innerText = "I'm so glad you liked it and spent your time on it. Happy New Year!";
-                createConfetti(100);
-                sendEmail("Successful");
-            } else {
+    if (answer === 'yes') {
+        header.innerText = "Thank You Very Much! ❤️";
+        msg.innerText = "I'm so glad you liked it and spent your time on it. Happy New Year!";
+        createConfetti(100);
+        sendEmail("Successful");
+        showWishes(); // <--- ADD THIS LINE HERE
+    }else {
                 header.innerText = "I Will Try Next Time! 😔";
                 msg.innerText = "Thank you for spending time on this wish. I only have my time to spend for you, and I will try to do my best next time.";
                 sendEmail("Try Next Time");
             }
         }
 
-        function sendEmail(statusMessage) {
-            const templateParams = {
-                to_email: 'basilputhaythuu@gmail.com', 
-                message: statusMessage
-            };
+       function sendEmail(statusMessage) {
+    const templateParams = {
+        to_email: 'basilv416@gmail.com', 
+        message: statusMessage
+    };
 
-            if (emailjs.send && SERVICE_ID !== 'YOUR_SERVICE_ID' && TEMPLATE_ID !== 'YOUR_TEMPLATE_ID') {
-                emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
-                    .then(function(response) {
-                       console.log('EMAIL SUCCESS:', response.status, response.text);
-                    }, function(error) {
-                       console.log('EMAIL FAILED:', error);
-                    });
-            } else {
-                console.log('EmailJS not configured. Logged status:', statusMessage);
-            }
-        }
+    // Simplify this: just check if the service is initialized and IDs are provided
+    if (emailjs.send && SERVICE_ID && TEMPLATE_ID) {
+        emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+            .then(function(response) {
+               console.log('EMAIL SUCCESS:', response.status, response.text);
+            }, function(error) {
+               console.log('EMAIL FAILED:', error);
+            });
+    } else {
+        console.log('EmailJS not configured correctly.');
+    }
+}
+        function showWishes() {
+    const wishes = ["Take Care", "Be Happy","Love You "];
+    const msgContainer = document.getElementById('final-message');
+    msgContainer.innerHTML += '<div id="wish-list" style="margin-top:20px"></div>';
+    
+    wishes.forEach((wish, index) => {
+        setTimeout(() => {
+            const el = document.createElement('p');
+            el.className = 'wish-item';
+            el.innerText = `✨ ${wish}`;
+            document.getElementById('wish-list').appendChild(el);
+            setTimeout(() => el.classList.add('show'), 10);
+        }, index * 800);
+    });
+}
+// Call showWishes() inside your handleResponse('yes') function!
+
     </script>
 </body>
 </html>
